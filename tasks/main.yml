@@ -14,6 +14,18 @@
   failed_when: false
   changed_when: false
 
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: lxc_nvidia_is_host
+
+- name: Install proxmox headers are installed
+  ansible.builtin.apt:
+    name: pve-headers
+    state: present
+  when: lxc_nvidia_is_host
+
 - name: Run NVIDIA installer
   ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host and '' or '--no-kernel-module' }}"
   changed_when: true

@@ -1,14 +1,4 @@
 ---
-- name: Update APT cache
-  ansible.builtin.apt:
-    update_cache: yes
-    cache_valid_time: 3600
-
-- name: Install proxmox headers are installed
-  ansible.builtin.apt:
-    name: pve-headers
-    state: present
-
 - name: ensure NVIDIA rules are present
   ansible.builtin.copy:
     src: 70-nvidia.rules
