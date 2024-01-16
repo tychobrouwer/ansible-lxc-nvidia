@@ -1,0 +1,55 @@
+---
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install proxmox headers are installed
+  ansible.builtin.apt:
+    name: pve-headers
+    state: present
+
+- name: ensure NVIDIA rules are present
+  ansible.builtin.copy:
+    src: 70-nvidia.rules
+    dest: /etc/udev/rules.d/70-nvidia.rules
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Add NVIDIA and nvidia_uvm to modules
+  ansible.builtin.blockinfile:
+    path: /etc/modules-load.d/modules.conf
+    block: |
+      nvidia
+      nvidia_uvm
+      vfio
+      vfio_iommu_type1
+      vfio_pci
+      vfio_virqfd
+
+- name: Update initramfs
+  ansible.builtin.command: update-initramfs -u
+  changed_when: true
+  when: "'Driver Version' not in nvidia_result.stdout"
+
+- name: Get guid of nvidia files
+  ansible.builtin.shell: "ls -l /dev/nvidia* | awk '{print $5}' | uniq | grep . | tr -d -c '0-9\n'"
+  register: nvidia_guid
+  changed_when: false
+
+- name: Add nvidia guids to lxc config
+  ansible.builtin.blockinfile:
+    path: /etc/pve/lxc/{{ lxc_nvidia_lxc_id }}.conf
+    block: |
+      lxc.cgroup2.devices.allow: c {{ nvidia_guid.stdout_lines[0] }}:* rwm
+      lxc.cgroup2.devices.allow: c {{ nvidia_guid.stdout_lines[1] }}:* rwm
+      lxc.cgroup2.devices.allow: c {{ nvidia_guid.stdout_lines[2] }}:* rwm
+      lxc.mount.entry: /dev/nvidia0 dev/nvidia0 none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidiactl dev/nvidiactl none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidia-uvm dev/nvidia-uvm none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidia-modeset dev/nvidia-modeset none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidia-uvm-tools dev/nvidia-uvm-tools none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidia-caps/nvidia-cap1 dev/nvidia-caps/nvidia-cap1 none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidia-caps/nvidia-cap2 dev/nvidia-caps/nvidia-cap2 none bind,optional,create=file
+    marker: "# {mark} ANSIBLE MANAGED BLOCK nvidia guids"

@@ -1,2 +1,24 @@
 ---
 # tasks file for ansible-lxc-nvidia
+- name: Ensure NVIDIA installer is present
+  ansible.builtin.get_url:
+    url: "{{ NVIDIA_download_url }}"
+    dest: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run"
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Check if NVIDIA is installed
+  ansible.builtin.command: "nvidia-smi"
+  register: nvidia_result
+  failed_when: false
+  changed_when: false
+
+- name: Run NVIDIA installer
+  ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host and '' or '--no-kernel-module' }}"
+  changed_when: true
+  when: "'Driver Version' not in nvidia_result.stdout"
+
+- name: Run host specific tasks
+  ansible.builtin.include_tasks: host.yml
+  when: lxc_nvidia_is_host
