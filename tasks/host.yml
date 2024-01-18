@@ -1,5 +1,5 @@
 ---
-- name: ensure NVIDIA rules are present
+- name: Ensure NVIDIA rules are present
   ansible.builtin.copy:
     src: 70-nvidia.rules
     dest: /etc/udev/rules.d/70-nvidia.rules
@@ -24,7 +24,7 @@
   when: "'Driver Version' not in nvidia_result.stdout"
 
 - name: Get guid of nvidia files
-  ansible.builtin.shell: "ls -l /dev/nvidia* | awk '{print $5}' | uniq | grep . | tr -d -c '0-9\n'"
+  ansible.builtin.shell: "set -o pipefail && ls -l /dev/nvidia* | awk '{print $5}' | uniq | grep . | tr -d -c '0-9\n'"
   register: nvidia_guid
   changed_when: false
 
