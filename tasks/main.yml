@@ -2,7 +2,7 @@
 # tasks file for ansible-lxc-nvidia
 - name: Ensure NVIDIA installer is present
   ansible.builtin.get_url:
-    url: "{{ NVIDIA_download_url }}"
+    url: "https://us.download.nvidia.com/XFree86/Linux-x86_64/{{ lxc_nvidia_version }}/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run"
     dest: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run"
     mode: "0755"
     owner: root

@@ -1,5 +1,5 @@
 ---
 # vars file for ansible-lxc-nvidia
-lxc_nvidia_version: 460.73.01
+lxc_nvidia_version: 535.154.05
 lxc_nvidia_lxc_id: 100
 lxc_nvidia_is_host: false
