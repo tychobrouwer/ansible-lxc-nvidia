@@ -14,16 +14,8 @@
   failed_when: false
   changed_when: false
 
-- name: Update APT cache
-  ansible.builtin.apt:
-    update_cache: true
-    cache_valid_time: 3600
-  when: lxc_nvidia_is_host
-
-- name: Install proxmox headers are installed
-  ansible.builtin.apt:
-    name: pve-headers
-    state: present
+- name: Run host specific pre-install tasks
+  ansible.builtin.include_tasks: host-pre.yml
   when: lxc_nvidia_is_host
 
 - name: Run NVIDIA installer
@@ -34,3 +26,8 @@
 - name: Run host specific tasks
   ansible.builtin.include_tasks: host.yml
   when: lxc_nvidia_is_host
+
+- name: Run NVIDIA patch
+  ansible.builtin.command: /root/patch.sh
+  changed_when: true
+  when: "'Driver Version' not in nvidia_result.stdout"

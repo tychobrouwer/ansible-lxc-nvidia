@@ -5,6 +5,8 @@ The role installs and configures nvidia drivers in LXC containers (and the host)
 
 <https://theorangeone.net/posts/lxc-nvidia-gpu-passthrough/>
 
+<https://matthieu.yiptong.ca/2020/12/06/nvidia-gpu-passthrough-to-lxc-containers-on-proxmox-6-for-nvenc-in-plex/>
+
 Role Variables
 --------------
 

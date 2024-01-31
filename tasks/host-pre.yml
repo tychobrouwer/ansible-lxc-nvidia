@@ -1,0 +1,19 @@
+- name: Get nvidia patch
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/keylase/nvidia-patch/master/patch.sh
+    dest: /root/patch.sh
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install proxmox headers and dkms
+  ansible.builtin.apt:
+    name: 
+      - pve-headers
+      - dkms
+    state: present

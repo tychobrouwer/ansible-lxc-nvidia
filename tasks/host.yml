@@ -24,22 +24,29 @@
   when: "'Driver Version' not in nvidia_result.stdout"
 
 - name: Get guid of nvidia files
-  ansible.builtin.shell: "set -o pipefail && ls -l /dev/nvidia* | awk '{print $5}' | uniq | grep . | tr -d -c '0-9\n'"
+  ansible.builtin.shell: "set -o pipefail && ls -l /dev/nvidia* /dev/dri/renderD128 | awk '{print $5}' | uniq | grep . | tr -d -c '0-9\n'"
   register: nvidia_guid
   changed_when: false
 
-- name: Add nvidia guids to lxc config
+- name: Add nvidia uids and mounts to lxc config
   ansible.builtin.blockinfile:
     path: /etc/pve/lxc/{{ lxc_nvidia_lxc_id }}.conf
     block: |
       lxc.cgroup2.devices.allow: c {{ nvidia_guid.stdout_lines[0] }}:* rwm
       lxc.cgroup2.devices.allow: c {{ nvidia_guid.stdout_lines[1] }}:* rwm
       lxc.cgroup2.devices.allow: c {{ nvidia_guid.stdout_lines[2] }}:* rwm
+      lxc.cgroup2.devices.allow: c {{ nvidia_guid.stdout_lines[3] }}:* rwm
+      lxc.mount.entry: /dev/dri dev/dri none bind,optional,create=dir
       lxc.mount.entry: /dev/nvidia0 dev/nvidia0 none bind,optional,create=file
       lxc.mount.entry: /dev/nvidiactl dev/nvidiactl none bind,optional,create=file
       lxc.mount.entry: /dev/nvidia-uvm dev/nvidia-uvm none bind,optional,create=file
       lxc.mount.entry: /dev/nvidia-modeset dev/nvidia-modeset none bind,optional,create=file
       lxc.mount.entry: /dev/nvidia-uvm-tools dev/nvidia-uvm-tools none bind,optional,create=file
-      lxc.mount.entry: /dev/nvidia-caps/nvidia-cap1 dev/nvidia-caps/nvidia-cap1 none bind,optional,create=file
-      lxc.mount.entry: /dev/nvidia-caps/nvidia-cap2 dev/nvidia-caps/nvidia-cap2 none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidia-caps dev/nvidia-caps none bind,optional,create=dir
     marker: "# {mark} ANSIBLE MANAGED BLOCK nvidia guids"
+
+- name: Ensure NVIDIA persistence daemon is enabled
+  ansible.builtin.service:
+    name: nvidia-persistenced
+    enabled: true
+    state: started
