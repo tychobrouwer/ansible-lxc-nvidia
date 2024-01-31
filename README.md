@@ -3,6 +3,8 @@ Install and configure nvidia drivers in LXC containers
 
 The role installs and configures nvidia drivers in LXC containers (and the host).
 
+It should be run on the host and the container with the same variables.
+
 <https://theorangeone.net/posts/lxc-nvidia-gpu-passthrough/>
 
 <https://matthieu.yiptong.ca/2020/12/06/nvidia-gpu-passthrough-to-lxc-containers-on-proxmox-6-for-nvenc-in-plex/>
@@ -10,7 +12,11 @@ The role installs and configures nvidia drivers in LXC containers (and the host)
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+The ```lxc_nvidia_version``` variable should be set to the full version number of the driver to be installed
+
+```lxc_nvidia_lxc_id``` should be set to the container id of the container to install the drivers in
+
+```lxc_nvidia_is_host``` should be set to true if the role is run on the host, false if it is run in the container
 
 Example Playbook
 ----------------
@@ -18,7 +24,7 @@ Example Playbook
 ```yaml
     - hosts: servers
       roles:
-         - { role: tychobrouwer.lxc_nvidia }
+         - { role: tychobrouwer.lxc_nvidia, lxc_nvidia_version: 535.154.05, lxc_nvidia_lxc_id: 101, lxc_nvidia_is_host: false }
 ```
 
 License
