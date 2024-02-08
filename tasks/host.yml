@@ -25,7 +25,8 @@
 
 - name: Get guid of nvidia files
   ansible.builtin.shell: "set -o pipefail && ls -l /dev/nvidia* /dev/dri/renderD128 | awk '{print $5}' | uniq | grep . | tr -d -c '0-9\n'"
-  executable: /bin/bash
+  args:
+    executable: /bin/bash
   register: nvidia_guid
   changed_when: false
 
