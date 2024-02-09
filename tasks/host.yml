@@ -6,6 +6,7 @@
     mode: "0644"
     owner: root
     group: root
+  register: rules_result
 
 - name: Add NVIDIA and nvidia_uvm to modules
   ansible.builtin.blockinfile:
@@ -17,11 +18,12 @@
       vfio_iommu_type1
       vfio_pci
       vfio_virqfd
+  register: modules_result
 
 - name: Update initramfs
   ansible.builtin.command: update-initramfs -u
   changed_when: true
-  when: "'Driver Version' not in nvidia_result.stdout"
+  when: rules_result.changed or modules_result.changed
 
 - name: Ensure NVIDIA persistence daemon is enabled
   ansible.builtin.service:

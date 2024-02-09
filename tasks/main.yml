@@ -28,11 +28,6 @@
   ansible.builtin.include_tasks: host.yml
   when: lxc_nvidia_is_host
 
-- name: Reboot host
-  ansible.builtin.reboot:
-    post_reboot_delay: 30
-  when: nvidia_install_result.changed
-
 - name: Run NVIDIA patch
   ansible.builtin.command: /root/patch.sh
   changed_when: true
