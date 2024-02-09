@@ -1,5 +1,13 @@
 ---
 # tasks file for ansible-lxc-nvidia
+- name: Get nvidia patch
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/keylase/nvidia-patch/master/patch.sh
+    dest: /root/patch.sh
+    mode: "0755"
+    owner: root
+    group: root
+
 - name: Ensure NVIDIA installer is present
   ansible.builtin.get_url:
     url: "https://us.download.nvidia.com/XFree86/Linux-x86_64/{{ lxc_nvidia_version }}/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run"
