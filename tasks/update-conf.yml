@@ -55,6 +55,7 @@
       lxc.mount.entry: /dev/nvidia-uvm-tools dev/nvidia-uvm-tools none bind,optional,create=file
       lxc.mount.entry: /dev/nvidia-caps dev/nvidia-caps none bind,optional,create=dir
     marker: "# {mark} ANSIBLE MANAGED BLOCK nvidia guids"
+  changed_when: false
 
 - name: Remove new lines and comments
   ansible.builtin.replace:
