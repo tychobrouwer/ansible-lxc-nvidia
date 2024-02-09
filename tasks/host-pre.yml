@@ -1,3 +1,4 @@
+---
 - name: Update APT cache
   ansible.builtin.apt:
     update_cache: true
@@ -10,3 +11,7 @@
       - dkms
     state: present
   register: package_install_result
+
+- name: Reboot host
+  ansible.builtin.reboot:
+  when: package_install_result.changed
