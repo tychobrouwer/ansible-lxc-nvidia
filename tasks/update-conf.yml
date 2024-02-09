@@ -1,0 +1,77 @@
+---
+- name: Ensure source lxc folder exists
+  ansible.builtin.file:
+    path: ~/lxc_configs
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Get old lxc config
+  ansible.builtin.stat:
+    path: /etc/pve/lxc/{{ lxc_nvidia_lxc_id }}.conf
+  register: old_lxc_config
+
+- name: Create temp copy of lxc config
+  ansible.builtin.copy:
+    src: /etc/pve/lxc/{{ lxc_nvidia_lxc_id }}.conf
+    dest: /root/lxc_configs/{{ lxc_nvidia_lxc_id }}.conf
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0644"
+  changed_when: false
+
+- name: Remove old configurations
+  ansible.builtin.replace:
+    path: /root/lxc_configs/{{ lxc_nvidia_lxc_id }}.conf
+    regexp: "{{ item }}"
+    replace: ""
+  with_items:
+    - "^lxc.cgroup2.devices.allow:.*"
+    - "^lxc.mount.entry: /dev/.*"
+  changed_when: false
+
+- name: Get guid of nvidia files
+  ansible.builtin.shell: "set -o pipefail && ls -l /dev/nvidia* /dev/dri/renderD128 | awk '{print $5}' | uniq | grep . | tr -d -c '0-9\n'"
+  args:
+    executable: /bin/bash
+  register: nvidia_guid
+  changed_when: false
+
+- name: Add nvidia uids and mounts to lxc config
+  ansible.builtin.blockinfile:
+    path: /root/lxc_configs/{{ lxc_nvidia_lxc_id }}.conf
+    block: |
+      lxc.cgroup2.devices.allow: c {{ nvidia_guid.stdout_lines[0] }}:* rwm
+      lxc.cgroup2.devices.allow: c {{ nvidia_guid.stdout_lines[1] }}:* rwm
+      lxc.cgroup2.devices.allow: c {{ nvidia_guid.stdout_lines[2] }}:* rwm
+      lxc.cgroup2.devices.allow: c {{ nvidia_guid.stdout_lines[3] }}:* rwm
+      lxc.mount.entry: /dev/dri dev/dri none bind,optional,create=dir
+      lxc.mount.entry: /dev/nvidia0 dev/nvidia0 none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidiactl dev/nvidiactl none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidia-uvm dev/nvidia-uvm none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidia-modeset dev/nvidia-modeset none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidia-uvm-tools dev/nvidia-uvm-tools none bind,optional,create=file
+      lxc.mount.entry: /dev/nvidia-caps dev/nvidia-caps none bind,optional,create=dir
+    marker: "# {mark} ANSIBLE MANAGED BLOCK nvidia guids"
+
+- name: Remove new lines and comments
+  ansible.builtin.replace:
+    path: /root/lxc_configs/{{ lxc_nvidia_lxc_id }}.conf
+    regexp: "{{ item}}"
+    replace: ""
+  with_items:
+    - "^#.*\n"
+    - "^\n"
+  changed_when: false
+
+- name: Get new lxc config
+  ansible.builtin.stat:
+    path: /etc/pve/lxc/{{ lxc_nvidia_lxc_id }}.conf
+  register: new_lxc_config
+
+- name: Copy config
+  ansible.builtin.command: cp /root/lxc_configs/{{ lxc_nvidia_lxc_id }}.conf /etc/pve/lxc/{{ lxc_nvidia_lxc_id }}.conf
+  changed_when: true
+  when: old_lxc_config.stat.checksum != new_lxc_config.stat.checksum
