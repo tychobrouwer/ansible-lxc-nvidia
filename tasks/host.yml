@@ -23,9 +23,6 @@
   changed_when: true
   when: "'Driver Version' not in nvidia_result.stdout"
 
-- name: Update lxc config
-  ansible.builtin.include_tasks: update-conf.yml
-
 - name: Ensure NVIDIA persistence daemon is enabled
   ansible.builtin.service:
     name: nvidia-persistenced
