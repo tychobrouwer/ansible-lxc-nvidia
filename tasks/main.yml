@@ -32,14 +32,20 @@
   when: "'Driver Version' not in nvidia_result.stdout or lxc_nvidia_version not in nvidia_result.stdout"
   register: nvidia_install_result
 
+- name: Reboot lxc container
+  ansible.builtin.reboot:
+  when: nvidia_install_result.changed and not lxc_nvidia_is_host
+
 - name: Run host specific tasks
   ansible.builtin.include_tasks: host.yml
   when: lxc_nvidia_is_host
 
 - name: Run NVIDIA patch
   ansible.builtin.command: /root/patch.sh
-  changed_when: true
+  register: nvidia_patch_result
+  changed_when: "'Skipping patch' not in nvidia_patch_result.stdout"
   when: nvidia_install_result.changed
 
 - name: Update lxc config
   ansible.builtin.include_tasks: update-conf.yml
+  when: lxc_nvidia_is_host
