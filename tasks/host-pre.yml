@@ -13,7 +13,7 @@
 
 - name: Install proxmox headers and dkms
   ansible.builtin.apt:
-    name: 
+    name:
       - pve-headers
       - dkms
     state: present

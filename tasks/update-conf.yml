@@ -60,7 +60,7 @@
 - name: Remove new lines and comments
   ansible.builtin.replace:
     path: /root/lxc_configs/{{ lxc_nvidia_lxc_id }}.conf
-    regexp: "{{ item}}"
+    regexp: "{{ item }}"
     replace: ""
   with_items:
     - "^#.*\n"
