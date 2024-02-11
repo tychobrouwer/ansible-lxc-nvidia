@@ -12,6 +12,6 @@
     state: present
   register: package_install_result
 
-- name: Reboot host
+- name: Reboot host # noqa no-handler
   ansible.builtin.reboot:
   when: package_install_result.changed

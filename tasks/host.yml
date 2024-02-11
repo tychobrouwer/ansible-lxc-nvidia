@@ -20,7 +20,7 @@
       vfio_virqfd
   register: modules_result
 
-- name: Update initramfs
+- name: Update initramfs # noqa no-handler
   ansible.builtin.command: update-initramfs -u
   changed_when: true
   when: rules_result.changed or modules_result.changed

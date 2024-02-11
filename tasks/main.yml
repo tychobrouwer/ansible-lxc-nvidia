@@ -40,7 +40,7 @@
   ansible.builtin.include_tasks: host.yml
   when: lxc_nvidia_is_host
 
-- name: Run NVIDIA patch
+- name: Run NVIDIA patch # noqa no-handler
   ansible.builtin.command: /root/patch.sh
   register: nvidia_patch_result
   changed_when: "'Skipping patch' not in nvidia_patch_result.stdout"
