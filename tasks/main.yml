@@ -36,6 +36,11 @@
   ansible.builtin.reboot:
   when: nvidia_install_result.changed
 
+- name: Run NVIDIA installer
+  ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host and '' or '--no-kernel-module' }}"
+  changed_when: true
+  when: "lxc_nvidia_version not in nvidia_result.stdout"
+
 - name: Run host specific tasks
   ansible.builtin.include_tasks: host.yml
   when: lxc_nvidia_is_host
@@ -43,7 +48,7 @@
 - name: Run NVIDIA patch # noqa no-handler
   ansible.builtin.command: /root/patch.sh
   register: nvidia_patch_result
-  changed_when: "'Skipping patch' not in nvidia_patch_result.stdout"
+  changed_when: "'Patched!' in nvidia_patch_result.stdout"
   when: nvidia_install_result.changed
 
 - name: Update lxc config
