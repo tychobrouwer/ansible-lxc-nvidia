@@ -29,12 +29,12 @@
 - name: Run NVIDIA installer
   ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host and '' or '--no-kernel-module' }}"
   changed_when: true
-  when: "'Driver Version' not in nvidia_result.stdout or lxc_nvidia_version not in nvidia_result.stdout"
+  when: "lxc_nvidia_version not in nvidia_result.stdout"
   register: nvidia_install_result
 
-- name: Reboot lxc container
+- name: Reboot
   ansible.builtin.reboot:
-  when: nvidia_install_result.changed and not lxc_nvidia_is_host
+  when: nvidia_install_result.changed
 
 - name: Run host specific tasks
   ansible.builtin.include_tasks: host.yml
