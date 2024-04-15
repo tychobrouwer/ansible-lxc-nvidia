@@ -24,9 +24,3 @@
   ansible.builtin.command: update-initramfs -u
   changed_when: true
   when: rules_result.changed or modules_result.changed
-
-- name: Ensure NVIDIA persistence daemon is enabled
-  ansible.builtin.service:
-    name: nvidia-persistenced
-    enabled: true
-    state: started
