@@ -1,5 +1,11 @@
 ---
 # tasks file for ansible-lxc-nvidia
+- name: Install packages
+  ansible.builtin.package:
+    name: 
+      - initramfs-tools
+    state: present
+
 - name: Get nvidia patch
   ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/keylase/nvidia-patch/master/patch.sh
