@@ -41,12 +41,12 @@
 
 - name: Reboot
   ansible.builtin.reboot:
-  when: nvidia_install_result.changed or nvidia_install_result.failed
+  when: nvidia_install_result.changed or 'failed' in nvidia_install_result
 
 - name: Retry install
   ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host and '' or '--no-kernel-module' }}"
   changed_when: true
-  when: nvidia_install_result.failed
+  when: 'failed' in nvidia_install_result
   failed_when: false
   register: nvidia_install_result
 
