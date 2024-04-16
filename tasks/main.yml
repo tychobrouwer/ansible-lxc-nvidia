@@ -2,7 +2,7 @@
 # tasks file for ansible-lxc-nvidia
 - name: Install packages
   ansible.builtin.package:
-    name: 
+    name:
       - initramfs-tools
     state: present
 
