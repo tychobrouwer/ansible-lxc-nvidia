@@ -9,6 +9,7 @@
     name:
       - pve-headers
       - dkms
+      - initramfs-tools
     state: present
   register: package_install_result
 

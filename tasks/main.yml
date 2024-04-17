@@ -1,11 +1,5 @@
 ---
 # tasks file for ansible-lxc-nvidia
-- name: Install packages
-  ansible.builtin.package:
-    name:
-      - initramfs-tools
-    state: present
-
 - name: Get nvidia patch
   ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/keylase/nvidia-patch/master/patch.sh
@@ -50,13 +44,13 @@
   failed_when: false
   register: nvidia_install_result
 
-- name: Reboot
-  ansible.builtin.reboot:
-  when: nvidia_install_result.changed
-
 - name: Run host specific tasks
   ansible.builtin.include_tasks: host.yml
   when: lxc_nvidia_is_host
+
+- name: Reboot
+  ansible.builtin.reboot:
+  when: nvidia_install_result.changed
 
 - name: Run NVIDIA installer
   ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host and '' or '--no-kernel-module' }}"
