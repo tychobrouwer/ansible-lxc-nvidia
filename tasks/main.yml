@@ -1,6 +1,6 @@
 ---
 # tasks file for ansible-lxc-nvidia
-- name: Get nvidia patch
+- name: Get NVIDIA patch script
   ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/keylase/nvidia-patch/master/patch.sh
     dest: /root/patch.sh
@@ -27,18 +27,18 @@
   when: lxc_nvidia_is_host
 
 - name: Run NVIDIA installer
-  ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host and '' or '--no-kernel-module' }}"
+  ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host | ternary('', '--no-kernel-module') }}"
   changed_when: true
   when: "lxc_nvidia_version not in nvidia_result.stdout"
   failed_when: false
   register: nvidia_install_result
 
-- name: Reboot
+- name: Reboot if NVIDIA installation changed
   ansible.builtin.reboot:
   when: nvidia_install_result.changed or "failed" in nvidia_install_result
 
-- name: Retry install
-  ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host and '' or '--no-kernel-module' }}"
+- name: Retry NVIDIA installation if it failed
+  ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host | ternary('', '--no-kernel-module') }}"
   changed_when: true
   when: '"failed" in nvidia_install_result'
   failed_when: false
@@ -48,21 +48,21 @@
   ansible.builtin.include_tasks: host.yml
   when: lxc_nvidia_is_host
 
-- name: Reboot
+- name: Reboot after installation if there were changes
   ansible.builtin.reboot:
   when: nvidia_install_result.changed
 
-- name: Run NVIDIA installer
-  ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host and '' or '--no-kernel-module' }}"
+- name: Run NVIDIA installer again if needed
+  ansible.builtin.command: "/root/NVIDIA-Linux-x86_64-{{ lxc_nvidia_version }}.run -asq {{ lxc_nvidia_is_host | ternary('', '--no-kernel-module') }}"
   changed_when: true
   when: "lxc_nvidia_version not in nvidia_result.stdout"
 
-- name: Run NVIDIA patch # noqa no-handler
+- name: Run NVIDIA patch script
   ansible.builtin.command: /root/patch.sh
   register: nvidia_patch_result
   changed_when: "'Patched!' in nvidia_patch_result.stdout"
   when: nvidia_install_result.changed
 
-- name: Update lxc config
+- name: Update LXC configuration
   ansible.builtin.include_tasks: update-conf.yml
   when: lxc_nvidia_is_host

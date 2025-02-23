@@ -1,5 +1,5 @@
 ---
-- name: Ensure NVIDIA rules are present
+- name: Ensure NVIDIA udev rules are present
   ansible.builtin.copy:
     src: 70-nvidia.rules
     dest: /etc/udev/rules.d/70-nvidia.rules
@@ -8,7 +8,7 @@
     group: root
   register: rules_result
 
-- name: Add NVIDIA and nvidia_uvm to modules
+- name: Ensure NVIDIA and VFIO modules are added to modules-load
   ansible.builtin.blockinfile:
     path: /etc/modules-load.d/modules.conf
     block: |
@@ -18,9 +18,10 @@
       vfio_iommu_type1
       vfio_pci
       vfio_virqfd
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - NVIDIA Modules"
   register: modules_result
 
-- name: Update initramfs # noqa no-handler
+- name: Update initramfs if rules or modules were changed
   ansible.builtin.command: update-initramfs -u
   changed_when: true
   when: rules_result.changed or modules_result.changed

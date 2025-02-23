@@ -4,7 +4,7 @@
     update_cache: true
     cache_valid_time: 3600
 
-- name: Install proxmox headers and dkms
+- name: Install Proxmox headers, DKMS, and initramfs-tools
   ansible.builtin.apt:
     name:
       - pve-headers
@@ -13,6 +13,6 @@
     state: present
   register: package_install_result
 
-- name: Reboot host # noqa no-handler
+- name: Reboot the host if packages were installed
   ansible.builtin.reboot:
   when: package_install_result.changed
