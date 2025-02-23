@@ -22,9 +22,23 @@ Example Playbook
 ----------------
 
 ```yaml
-    - hosts: servers
-      roles:
-         - { role: tychobrouwer.lxc_nvidia, lxc_nvidia_version: 535.154.05, lxc_nvidia_lxc_id: 101, lxc_nvidia_is_host: false }
+- hosts: host
+  vars:
+    lxc_nvidia_is_host: true
+    lxc_nvidia_lxc_id: 101
+    lxc_nvidia_version: 535.154.05
+
+  roles:
+    - role: tychobrouwer.lxc_nvidia
+
+- hosts: lxc
+  vars:
+    lxc_nvidia_is_host: false
+    lxc_nvidia_lxc_id: 101
+    lxc_nvidia_version: 535.154.05
+
+  roles:
+    - role: tychobrouwer.lxc_nvidia
 ```
 
 License
