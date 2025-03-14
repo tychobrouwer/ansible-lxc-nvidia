@@ -32,28 +32,28 @@
     - "^lxc.mount.entry: /dev/.*"
   changed_when: false
 
-- name: Get list of NVIDIA device files
-  ansible.builtin.shell: "ls -l /dev/nvidia* | awk '{print $5}' | cut -d',' -f1"
-  register: nvidia_ls_output
-  ignore_errors: true
+- name: Get guid of nvidia files
+  ansible.builtin.shell: |
+    set -o pipefail
+    ls -l /dev/nvidia* /dev/dri/renderD128 | awk '{print $5}' | grep -o '[0-9]*'
+  args:
+    executable: /bin/bash
+  register: nvidia_guid
   changed_when: false
 
-- name: Debug the ls output
-  debug:
-    var: nvidia_ls_output
-
-- name: Add NVIDIA UIDs and mounts to LXC config
+- name: Add nvidia uids and mounts to lxc config
   ansible.builtin.blockinfile:
-    path: "/root/lxc_configs/{{ lxc_nvidia_lxc_id }}.conf"
+    path: /root/lxc_configs/{{ lxc_nvidia_lxc_id }}.conf
     block: |
-      {% for major in nvidia_major_numbers.stdout_lines %}
-        lxc.cgroup2.devices.allow: c {{ major }}:* rwm
+      # Allow NVIDIA devices
+      {% for guid in nvidia_guid.stdout_lines %}
+      lxc.cgroup2.devices.allow: c {{ guid }}:* rwm
       {% endfor %}
+      
+      # Mount NVIDIA devices
       lxc.mount.entry: /dev/dri dev/dri none bind,optional,create=dir
-      {% for line in nvidia_ls_output.stdout_lines %}
-        {% set parts = line.split() %}
-        {% set device = parts[0] %}
-        lxc.mount.entry: {{ device }} {{ device }} none bind,optional,create=file
+      {% for device in ['nvidia0', 'nvidiactl', 'nvidia-uvm', 'nvidia-modeset', 'nvidia-uvm-tools', 'nvidia-caps'] %}
+      lxc.mount.entry: /dev/{{ device }} dev/{{ device }} none bind,optional,create=file
       {% endfor %}
     marker: "# {mark} ANSIBLE MANAGED BLOCK nvidia guids"
   changed_when: false
