@@ -39,9 +39,16 @@
     file_type: any
   register: nvidia_files
 
-- name: Debug NVIDIA files
+- name: Find NVIDIA device types
+  ansible.builtin.shell: ls -ld {{ item.path }} | awk '{print $1}'
+  register: nvidia_file_types
+  with_items: "{{ nvidia_files.files }}"
+  changed_when: false
+
+- name: Debug NVIDIA file types
   ansible.builtin.debug:
-    var: nvidia_files
+    msg: "{{ nvidia_file_types }}"
+  changed_when: false
 
 - name: Add NVIDIA UIDs and mounts to LXC config
   ansible.builtin.blockinfile:
