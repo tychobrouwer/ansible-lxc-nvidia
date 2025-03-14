@@ -38,6 +38,10 @@
     patterns: "nvidia*"
   register: nvidia_files
 
+- name: Debug NVIDIA file search
+  debug:
+    var: nvidia_files
+
 - name: Add NVIDIA UIDs and mounts to LXC config
   ansible.builtin.blockinfile:
     path: /root/lxc_configs/{{ lxc_nvidia_lxc_id }}.conf
