@@ -40,7 +40,7 @@
   register: nvidia_files
 
 - name: Find NVIDIA device types
-  ansible.builtin.shell: ls -ld {{ item.path }} | awk '{print $5}' | grep -o '[0-9]*'
+  ansible.builtin.shell: ls -l {{ item.path }} | awk '{print $5}' | grep -o '[0-9]*' | head -n 1
   register: nvidia_file_device_types
   with_items: "{{ nvidia_files.files }}"
   changed_when: false
