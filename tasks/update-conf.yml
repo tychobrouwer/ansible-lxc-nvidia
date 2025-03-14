@@ -36,6 +36,7 @@
   ansible.builtin.find:
     paths: /dev
     patterns: "nvidia*"
+    recurse: true
   register: nvidia_files
 
 - name: Debug NVIDIA file search
