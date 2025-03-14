@@ -48,6 +48,15 @@
   debug:
     var: nvidia_files_stats.results
 
+- name: Debug what Ansible sees in /dev
+  ansible.builtin.shell: "ls -la /dev | grep nvidia"
+  register: debug_nvidia_ls
+  changed_when: false
+  become: true
+
+- debug:
+    var: debug_nvidia_ls.stdout_lines
+
 # - name: Find NVIDIA device files
 #   ansible.builtin.find:
 #     paths: /dev
