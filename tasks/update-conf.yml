@@ -32,6 +32,24 @@
     - "^lxc.mount.entry: /dev/.*"
   changed_when: false
 
+- name: Debug what Ansible sees in /dev
+  ansible.builtin.shell: "ls -la /dev"
+  register: debug_nvidia_ls
+  changed_when: false
+  become: true
+
+- debug:
+    var: debug_nvidia_ls.stdout_lines
+
+- name: Debug what Ansible sees in /dev
+  ansible.builtin.shell: "ls -la /dev | grep nvidia"
+  register: debug_nvidia_ls
+  changed_when: false
+  become: true
+
+- debug:
+    var: debug_nvidia_ls.stdout_lines
+
 - name: Get list of NVIDIA device files
   ansible.builtin.command: "ls -1 /dev/nvidia*"
   register: nvidia_ls_output
@@ -47,15 +65,6 @@
 - name: Show NVIDIA file stats
   debug:
     var: nvidia_files_stats.results
-
-- name: Debug what Ansible sees in /dev
-  ansible.builtin.shell: "ls -la /dev | grep nvidia"
-  register: debug_nvidia_ls
-  changed_when: false
-  become: true
-
-- debug:
-    var: debug_nvidia_ls.stdout_lines
 
 # - name: Find NVIDIA device files
 #   ansible.builtin.find:
