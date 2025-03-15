@@ -41,8 +41,8 @@
   ansible.builtin.blockinfile:
     path: /root/lxc_configs/{{ lxc_nvidia_lxc_id }}.conf
     block: |
-      {% for file in nvidia_file_device_types.results %}
-      lxc.cgroup2.devices.allow: c {{ file.stdout }}:* rwm
+      {% for file in nvidia_file_device_types.stdout_lines %}
+      lxc.cgroup2.devices.allow: c {{ file }}:* rwm
       {% endfor %}
       lxc.mount.entry: /dev/dri dev/dri none bind,optional,create=dir
       lxc.mount.entry: /dev/nvidia0 dev/nvidia0 none bind,optional,create=file

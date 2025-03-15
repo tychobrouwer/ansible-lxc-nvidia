@@ -14,6 +14,8 @@
     block: |
       nvidia
       nvidia_uvm
+      nvidia_modeset
+      nvidia_drm
       vfio
       vfio_iommu_type1
       vfio_pci
